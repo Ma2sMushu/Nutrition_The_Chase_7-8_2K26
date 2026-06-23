@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Nutrition Chase - Year 7 Phase 3</title>
+<style>
+  :root{
+    --bg:#07172f;
+    --panel:#0f2d57;
+    --panel2:#123b73;
+    --gold:#f4c542;
+    --white:#ffffff;
+    --red:#d62828;
+    --green:#2a9d8f;
+    --blue:#1d4ed8;
+    --dark:#020617;
+    --orange:#f97316;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:radial-gradient(circle at top,#174887 0,#07172f 45%,#020617 100%);
+    color:var(--white);
+    min-height:100vh;
+  }
+  button{
+    cursor:pointer;
+    border:none;
+    border-radius:14px;
+    font-weight:800;
+    transition:.15s transform,.15s filter;
+  }
+  button:hover{transform:scale(1.02);filter:brightness(1.08)}
+  button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .screen{display:none;min-height:100vh;padding:24px}
+  .active{display:block}
+  .container{max-width:1180px;margin:0 auto}
+  .hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:24px;
+  }
+  .hero-card{
+    max-width:980px;
+    background:rgba(5,20,45,.92);
+    border:4px solid var(--gold);
+    border-radius:30px;
+    padding:36px;
+    box-shadow:0 0 35px rgba(244,197,66,.35);
+  }
+  h1{font-size:clamp(44px,7vw,92px);margin:0;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+  h2{font-size:clamp(28px,4vw,52px);margin:0 0 18px;color:var(--gold)}
+  h3{font-size:26px;margin:16px 0 8px;color:var(--gold)}
+  p{font-size:20px;line-height:1.45}
+  .subtitle{font-size:26px;margin:14px 0 24px}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+  .primary{background:var(--gold);color:#07172f;padding:16px 28px;font-size:22px}
+  .secondary{background:#ffffff;color:#07172f;padding:14px 22px;font-size:18px}
+  .danger{background:var(--red);color:white;padding:14px 22px;font-size:18px}
+  .topbar{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .badge{
+    background:rgba(255,255,255,.12);
+    border:2px solid rgba(255,255,255,.25);
+    padding:10px 14px;
+    border-radius:14px;
+    font-weight:800;
+    font-size:18px;
+  }
+  .grid{display:grid;grid-template-columns:1.4fr .8fr;gap:20px}
+  @media(max-width:850px){.grid{grid-template-columns:1fr}.screen{padding:14px}.hero-card{padding:22px}}
+  .card{
+    background:rgba(15,45,87,.92);
+    border:3px solid rgba(244,197,66,.8);
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 15px 35px rgba(0,0,0,.35);
+  }
+  .question{
+    font-size:clamp(25px,4vw,44px);
+    line-height:1.18;
+    font-weight:900;
+    margin:10px 0 22px;
+  }
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:650px){.answers{grid-template-columns:1fr}}
+  .answer{
+    background:#e5e7eb;
+    color:#06122a;
+    min-height:72px;
+    font-size:20px;
+    padding:16px;
+    border:3px solid transparent;
+  }
+  .answer.correct{background:#16a34a;color:white;border-color:#bbf7d0}
+  .answer.wrong{background:#dc2626;color:white;border-color:#fecaca}
+  .answer.neutral{background:#94a3b8;color:#06122a}
+  .timer{
+    font-size:64px;
+    font-weight:900;
+    color:var(--gold);
+    text-align:center;
+    margin:8px 0;
+  }
+  .big-score{
+    font-size:70px;
+    font-weight:900;
+    color:var(--gold);
+    text-align:center;
+  }
+  .rules li{font-size:19px;margin:8px 0;line-height:1.35}
+  .small{font-size:16px;opacity:.9}
+  .board-wrap{display:grid;grid-template-columns:1fr 1.2fr;gap:20px;align-items:start}
+  @media(max-width:850px){.board-wrap{grid-template-columns:1fr}}
+  .ladder{display:flex;flex-direction:column;gap:8px;max-width:420px;margin:0 auto;width:100%}
+  .step{
+    min-height:54px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px;
+    border-radius:14px;
+    background:rgba(255,255,255,.13);
+    border:2px solid rgba(255,255,255,.25);
+    font-size:18px;
+    font-weight:800;
+  }
+  .step.home{background:rgba(42,157,143,.35);border-color:#5eead4}
+  .step.offer{background:rgba(244,197,66,.22);border-color:var(--gold)}
+  .step.player{box-shadow:0 0 0 4px #22c55e inset;background:rgba(34,197,94,.33)}
+  .step.chaser{box-shadow:0 0 0 4px #ef4444 inset;background:rgba(239,68,68,.33)}
+  .token{font-size:24px;margin-left:8px}
+  .offers{display:grid;grid-template-columns:1fr;gap:14px;margin-top:18px}
+  .offer-btn{background:white;color:#07172f;padding:16px;font-size:22px;border:3px solid var(--gold)}
+  .feedback{
+    min-height:44px;
+    font-size:22px;
+    font-weight:900;
+    color:var(--gold);
+    margin-top:16px;
+  }
+  .final-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:900px){.final-grid{grid-template-columns:1fr}}
+  .final-answer{font-size:20px;background:#e5e7eb;color:#06122a;padding:14px;border-radius:12px;margin:8px 0;font-weight:800}
+  .hidden{display:none!important}
+  .pill{display:inline-block;padding:8px 12px;border-radius:999px;background:rgba(244,197,66,.18);border:1px solid var(--gold);font-weight:800;margin:4px}
+  .footer-note{margin-top:18px;font-size:15px;opacity:.85;text-align:center}
+</style>
+</head>
+<body>
+
+<section id="intro" class="hero active">
+  <div class="hero-card">
+    <h1>The Nutrition Chase</h1>
+    <div class="subtitle">Year 7 Health & PE • Phase 3 • Nutrition</div>
+    <p>Beat the Chaser by answering nutrition questions about carbohydrates, protein, fats, vitamins, minerals, water, balanced eating, and hauora.</p>
+    <div class="btn-row">
+      <button class="primary" onclick="showRules()">Start Game</button>
+      <button class="secondary" onclick="openTeacherMode()">Teacher Controls</button>
+    </div>
+    <p class="small">Works as one file: <b>index.html</b>. Upload it to GitHub Pages to make it live.</p>
+  </div>
+</section>
+
+<section id="rules" class="screen">
+  <div class="container">
+    <div class="card">
+      <h2>How to Play</h2>
+      <ol class="rules">
+        <li><b>Cash Builder:</b> answer as many questions as you can before the timer ends. Each correct answer earns $1,000.</li>
+        <li><b>Head-to-Head Chase:</b> choose a low, middle, or high offer. Correct answers move you down the board. Wrong answers let the Chaser move.</li>
+        <li><b>Final Chase:</b> answer as many True/False statements as possible. The mix changes each game: 50/50, 45/55, or 40/60.</li>
+        <li><b>Restart:</b> use the restart button anytime to replay with randomised questions.</li>
+      </ol>
+      <div class="btn-row">
+        <button class="primary" onclick="startCashBuilder()">Begin Cash Builder</button>
+        <button class="secondary" onclick="goIntro()">Back</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="teacher" class="screen">
+  <div class="container">
+    <div class="card">
+      <h2>Teacher Controls</h2>
+      <p>Change these before starting. Settings reset when the page refreshes.</p>
+      <p><span class="pill">Cash Builder time: <input id="cashTimeInput" type="number" value="60" min="20" max="180" style="width:70px"></span>
+      <span class="pill">Final Chase time: <input id="finalTimeInput" type="number" value="90" min="30" max="240" style="width:70px"></span>
+      <span class="pill">Chaser difficulty:
+        <select id="difficultyInput">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+        </select>
+      </span></p>
+      <div class="btn-row">
+        <button class="primary" onclick="saveTeacherSettings()">Save Settings</button>
+        <button class="secondary" onclick="goIntro()">Back</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cash" class="screen">
+  <div class="container">
+    <div class="topbar">
+      <div class="badge">Round 1: Cash Builder</div>
+      <div class="badge">Bank: $<span id="cashBank">0</span></div>
+      <button class="danger" onclick="restartGame()">Restart</button>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="question" id="cashQuestion">Question appears here</div>
+        <div class="answers" id="cashAnswers"></div>
+        <div class="feedback" id="cashFeedback"></div>
+      </div>
+      <div class="card">
+        <h3>Time Left</h3>
+        <div class="timer" id="cashTimer">60</div>
+        <div class="big-score">$<span id="cashScoreBig">0</span></div>
+        <p class="small">Each correct answer adds $1,000.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="offers" class="screen">
+  <div class="container">
+    <div class="card">
+      <h2>Choose Your Offer</h2>
+      <p>You banked <b>$<span id="earnedOffer">0</span></b>. Choose your path against the Chaser.</p>
+      <div class="offers">
+        <button class="offer-btn" id="highOfferBtn" onclick="chooseOffer('high')">High Offer</button>
+        <button class="offer-btn" id="middleOfferBtn" onclick="chooseOffer('middle')">Middle Offer</button>
+        <button class="offer-btn" id="lowOfferBtn" onclick="chooseOffer('low')">Low Offer</button>
+      </div>
+      <div class="btn-row"><button class="danger" onclick="restartGame()">Restart</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="head" class="screen">
+  <div class="container">
+    <div class="topbar">
+      <div class="badge">Round 2: Head-to-Head Chase</div>
+      <div class="badge">Playing for: $<span id="chosenMoney">0</span></div>
+      <button class="danger" onclick="restartGame()">Restart</button>
+    </div>
+    <div class="board-wrap">
+      <div class="card">
+        <h3>The Chase Board</h3>
+        <div id="ladder" class="ladder"></div>
+        <p class="small">✅ You move down when you are correct. ❌ The Chaser moves down when you are wrong.</p>
+      </div>
+      <div class="card">
+        <div class="question" id="headQuestion">Question appears here</div>
+        <div class="answers" id="headAnswers"></div>
+        <div class="feedback" id="headFeedback"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="finalIntro" class="screen">
+  <div class="container">
+    <div class="card" style="text-align:center">
+      <h2>You Escaped the Chaser!</h2>
+      <p>You have taken <b>$<span id="finalMoney">0</span></b> into the Final Chase.</p>
+      <p>Answer as many questions as possible. Each correct answer gives you one step.</p>
+      <div class="btn-row">
+        <button class="primary" onclick="startFinalChase()">Start Final Chase</button>
+        <button class="danger" onclick="restartGame()">Restart</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="final" class="screen">
+  <div class="container">
+    <div class="topbar">
+      <div class="badge">Round 3: Final Chase</div>
+      <div class="badge">Steps: <span id="finalSteps">0</span></div>
+      <button class="danger" onclick="restartGame()">Restart</button>
+    </div>
+    <div class="final-grid">
+      <div class="card">
+        <h3>Your Final Chase</h3>
+        <div class="timer" id="finalTimer">90</div>
+        <div class="question" id="finalQuestion">Question appears here</div>
+        <div id="finalShortAnswers"></div>
+        <div class="feedback" id="finalFeedback"></div>
+      </div>
+      <div class="card">
+        <h3>Final Chase Score</h3>
+        <div class="big-score"><span id="finalStepsBig">0</span></div>
+        <p>Correct answers = steps for the Chaser to catch.</p>
+        <p class="small">For classroom use, students can call out the answer and the teacher clicks Correct or Pass.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="chaserFinal" class="screen">
+  <div class="container">
+    <div class="card" style="text-align:center">
+      <h2>The Chaser's Turn</h2>
+      <p>The Chaser must catch <b><span id="targetSteps">0</span></b> steps.</p>
+      <div class="big-score"><span id="chaserProgress">0</span></div>
+      <p id="chaserText">Press start to begin the Chaser simulation. The Chaser has a 90% chance of answering each question correctly.</p>
+      <div class="btn-row">
+        <button class="primary" id="startChaserBtn" onclick="runChaserFinal()">Start Chaser</button>
+        <button class="danger" onclick="restartGame()">Restart</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="result" class="screen">
+  <div class="container">
+    <div class="card" style="text-align:center">
+      <h2 id="resultTitle">Result</h2>
+      <p id="resultText"></p>
+      <div class="big-score">$<span id="resultMoney">0</span></div>
+      <div class="btn-row">
+        <button class="primary" onclick="restartGame()">Play Again</button>
+        <button class="secondary" onclick="goIntro()">Home</button>
+      </div>
+      <p class="footer-note">Nutrition focus: energy, growth, hydration, balanced eating, and hauora.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+let settings={cashTime:60,finalTime:90,difficulty:'normal'};
+let used=[];
+let cashScore=0;
+let chosenOffer=0;
+let playerPos=3;
+let chaserPos=0;
+let finalSteps=0;
+let cashInterval=null;
+let finalInterval=null;
+let currentCash=null;
+let currentHead=null;
+let currentFinal=null;
+let finalTrueCount=0;
+let finalFalseCount=0;
+let finalTrueTarget=0.5;
+
+const questions=[
+{q:"What is the body's main source of energy?",a:"Carbohydrates",o:["Protein","Water","Calcium"]},
+{q:"Which nutrient helps build and repair muscles?",a:"Protein",o:["Carbohydrates","Vitamin C","Water"]},
+{q:"Which mineral helps build strong bones and teeth?",a:"Calcium",o:["Iron","Zinc","Fat"]},
+{q:"Which mineral helps carry oxygen around the body?",a:"Iron",o:["Calcium","Vitamin D","Water"]},
+{q:"Which drink is best for hydration?",a:"Water",o:["Soft drink","Energy drink","Sports drink every day"]},
+{q:"Which food is a good source of carbohydrates?",a:"Bread",o:["Chicken","Eggs","Salmon"]},
+{q:"Which vitamin helps healing and immunity?",a:"Vitamin C",o:["Vitamin A","Calcium","Iron"]},
+{q:"Which nutrient gives long-lasting energy and protects organs?",a:"Fat",o:["Water","Iron","Vitamin C"]},
+{q:"Which food group provides fibre?",a:"Fruits and vegetables",o:["Lollies","Soft drinks","Butter only"]},
+{q:"What is dehydration?",a:"Not getting enough water",o:["Eating too much protein","Having strong bones","Getting too much sleep"]},
+{q:"Which two foods contain carbohydrates?",a:"Rice and kumara",o:["Chicken and eggs","Milk and cheese","Fish and beef"]},
+{q:"Why is protein important?",a:"It helps build and repair muscles",o:["It is the only source of water","It makes bones disappear","It stops the body using energy"]},
+{q:"Which food contains calcium?",a:"Yoghurt",o:["White bread","Lollies","Oil"]},
+{q:"Which is a sign of dehydration?",a:"Dark urine",o:["Stronger teeth","Better eyesight instantly","Growing taller overnight"]},
+{q:"What does a balanced diet mean?",a:"Eating a variety of foods from different food groups",o:["Eating only one food every day","Skipping water","Only eating sweet foods"]},
+{q:"How can healthy eating help learning at school?",a:"It can improve focus, energy, and memory",o:["It replaces sleep","It means homework is not needed","It stops all mistakes"]},
+{q:"Which area of hauora is supported when healthy food helps your body grow?",a:"Taha Tinana",o:["Taha Whānau only","Taha Wairua only","No part of hauora"]},
+{q:"Why is iron important?",a:"It helps carry oxygen around the body",o:["It makes food taste sweet","It replaces water","It builds phone batteries"]},
+{q:"Which is a healthy fat?",a:"Avocado",o:["Fizzy drink","White sugar","Lollipop"]},
+{q:"What does energy in versus energy out mean?",a:"Food gives energy and activity uses energy",o:["Water gives no help","Exercise creates food","Sleep removes all nutrients"]},
+{q:"Which nutrient helps regulate body temperature?",a:"Water",o:["Sugar only","Salt only","Protein only"]},
+{q:"Which nutrient supports growth and healing?",a:"Zinc",o:["Caffeine","Soft drink","Lollies"]},
+{q:"Which food is a good protein source?",a:"Beans",o:["Plain sugar","Fizzy drink","Ice blocks"]},
+{q:"Which food is a carbohydrate source?",a:"Oats",o:["Tuna","Eggs","Cheese"]},
+{q:"Which food is a fat source?",a:"Nuts",o:["Water","Apple juice only","Plain rice only"]},
+{q:"Which nutrient supports eyesight?",a:"Vitamins",o:["Only sugar","Only water","Only salt"]},
+{q:"Which is part of a balanced diet?",a:"Fruits and vegetables",o:["Only chips","Only fizzy drink","No water"]},
+{q:"What does Taha Hinengaro relate to?",a:"Mental and emotional wellbeing",o:["Only muscles","Only teeth","Only running speed"]},
+{q:"How can nutrition support Taha Whānau?",a:"Sharing healthy meals and habits with family",o:["Eating alone every time","Skipping meals together","Never talking about food"]},
+{q:"How can nutrition support Taha Wairua?",a:"Food choices can connect to values, culture, and identity",o:["Food has no connection to identity","Only sugar supports spirit","Water stops culture"]},
+{q:"Which is the best everyday drink for students?",a:"Water",o:["Fizzy drink","Energy drink","Chocolate syrup"]},
+{q:"Which meal is most balanced?",a:"Chicken, rice, vegetables, and water",o:["Lollies and soft drink","Chips only","Cake and energy drink"]},
+{q:"What can happen if you do not drink enough water?",a:"You may feel tired or dizzy",o:["You breathe underwater","You never get thirsty","Your bones turn to iron"]},
+{q:"Which nutrient helps repair the body after exercise?",a:"Protein",o:["Fizzy drink","Food colouring","Caffeine only"]},
+{q:"Which nutrient is found in potatoes and pasta?",a:"Carbohydrates",o:["Iron only","Vitamin C only","Water only"]},
+{q:"Which is a dairy food that may provide calcium?",a:"Cheese",o:["Oil","Sugar","Salt"]},
+{q:"Which food contains healthy fats?",a:"Salmon",o:["Jelly beans","Soft drink","White sugar"]},
+{q:"What is fibre useful for?",a:"Helping digestion",o:["Stopping all hunger forever","Replacing sleep","Making bones soft"]},
+{q:"What is one reason breakfast or a healthy meal can help at school?",a:"It gives energy for learning",o:["It makes tests disappear","It removes the need to listen","It stops the body growing"]},
+{q:"Which is a mineral?",a:"Calcium",o:["Carbohydrate","Protein","Water"]},
+{q:"Which is a main nutrient?",a:"Protein",o:["Plastic","Petrol","Wi-Fi"]},
+{q:"Which is a vitamin role?",a:"Supporting immunity",o:["Breaking bones","Removing oxygen","Causing dehydration"]},
+{q:"Which food is a good source of protein?",a:"Eggs",o:["Soft drink","Lollies","Plain oil"]},
+{q:"Which food is a carbohydrate?",a:"Kumara",o:["Beef","Fish","Egg"]},
+{q:"Which choice best supports hydration during the school day?",a:"Drink water regularly",o:["Avoid drinking all day","Only drink fizzy drink","Wait until you feel very sick"]},
+{q:"Which statement is true about fats?",a:"Some fats help protect organs",o:["All fats are water","Fats have no job","Fats are minerals"]},
+{q:"Which statement is true about carbohydrates?",a:"They are the body's main energy source",o:["They build teeth directly","They are only found in meat","They stop hydration"]},
+{q:"Which statement is true about protein?",a:"It supports growth",o:["It is only found in water","It makes oxygen disappear","It is the same as sugar"]},
+{q:"Which statement is true about water?",a:"It transports nutrients",o:["It is a vitamin","It is a fat","It is a carbohydrate"]},
+{q:"Which statement best describes nutrition?",a:"Getting nutrients from food and drink",o:["Only doing exercise","Only sleeping longer","Avoiding all food groups"]},
+{q:"Which food is rich in carbohydrates?",a:"Pasta",o:["Chicken breast","Egg","Tuna"]},
+{q:"Which is a possible sign that someone needs more water?",a:"Headache",o:["Instant stronger bones","Clearer internet","No need for food"]},
+{q:"Which mineral can help prevent tiredness by supporting oxygen movement?",a:"Iron",o:["Calcium","Sugar","Oil"]},
+{q:"Which food choice gives protein?",a:"Lentils",o:["Fizzy drink","Lollipop","Ice block"]},
+{q:"Which food choice gives healthy fat?",a:"Olive oil",o:["White sugar","Soft drink","Candy floss"]},
+{q:"Which food choice gives carbohydrates?",a:"Fruit",o:["Plain steak only","Egg only","Fish only"]},
+{q:"What should a balanced lunch include?",a:"A mix of food groups and water",o:["Only sweets","Only one chip packet","No drink"]},
+{q:"Why do growing bodies need nutrients?",a:"To grow, repair, move, learn, and stay healthy",o:["To avoid all movement","To stop learning","To replace breathing"]},
+{q:"What does calcium support?",a:"Strong bones and teeth",o:["Car engines","Phone screens","Hair dye"]},
+{q:"What does water help prevent?",a:"Dehydration",o:["Homework","Reading","Friendship"]}
+];
+
+
+const finalTrueStatements=[
+{statement:"Carbohydrates are the body's main source of energy.",answer:true,explain:"Carbohydrates are the body's main energy source."},
+{statement:"Protein helps build and repair muscles.",answer:true,explain:"Protein builds and repairs muscles and supports growth."},
+{statement:"Calcium helps build strong bones and teeth.",answer:true,explain:"Calcium supports strong bones and teeth."},
+{statement:"Iron helps carry oxygen around the body.",answer:true,explain:"Iron helps carry oxygen around the body."},
+{statement:"Water is the best everyday drink for hydration.",answer:true,explain:"Water supports hydration."},
+{statement:"Bread, rice, pasta, potatoes, kumara, oats and fruit can provide carbohydrates.",answer:true,explain:"These foods are carbohydrate sources."},
+{statement:"Vitamin C supports healing and immunity.",answer:true,explain:"Vitamin C helps healing and immunity."},
+{statement:"Fats can provide long-lasting energy and protect organs.",answer:true,explain:"Fats provide long-lasting energy and protect organs."},
+{statement:"Fruits and vegetables can provide fibre.",answer:true,explain:"Fruits and vegetables provide fibre."},
+{statement:"Dehydration means not getting enough water.",answer:true,explain:"Dehydration happens when the body does not get enough water."},
+{statement:"A balanced diet means eating a variety of foods from different food groups.",answer:true,explain:"Balanced eating includes variety."},
+{statement:"Healthy eating can help focus, memory, energy and learning at school.",answer:true,explain:"Nutrition supports learning and energy."},
+{statement:"Taha Tinana is supported when healthy food helps the body grow.",answer:true,explain:"Taha Tinana is physical wellbeing."},
+{statement:"Avocado, nuts, seeds, olive oil and salmon can be healthy fat sources.",answer:true,explain:"These foods can provide healthy fats."},
+{statement:"Water helps regulate body temperature and transport nutrients.",answer:true,explain:"Water regulates body temperature and transports nutrients."},
+{statement:"Zinc supports growth and healing.",answer:true,explain:"Zinc supports growth and healing."},
+{statement:"Beans, lentils, eggs, fish and meat can provide protein.",answer:true,explain:"These foods are protein sources."},
+{statement:"Nutrition supports Taha Tinana, Taha Hinengaro, Taha Whānau and Taha Wairua.",answer:true,explain:"Food and hauora are connected across all four areas."},
+{statement:"A balanced lunch could include protein, grains, vegetables and water.",answer:true,explain:"A balanced lunch uses a mix of food groups."},
+{statement:"Headache, tiredness, dizziness or dark urine can be signs of dehydration.",answer:true,explain:"These can be signs of dehydration."}
+];
+const finalFalseStatements=[
+{statement:"Protein is the body's main source of energy.",answer:false,explain:"Carbohydrates are the body's main energy source."},
+{statement:"Calcium carries oxygen around the body.",answer:false,explain:"Iron carries oxygen around the body."},
+{statement:"Iron builds strong bones and teeth.",answer:false,explain:"Calcium builds strong bones and teeth."},
+{statement:"Soft drink is the best everyday drink for hydration.",answer:false,explain:"Water is the best everyday drink for hydration."},
+{statement:"Fats have no useful job in the body.",answer:false,explain:"Fats provide long-lasting energy and protect organs."},
+{statement:"Dehydration means eating too much protein.",answer:false,explain:"Dehydration means not getting enough water."},
+{statement:"A balanced diet means eating only one food every day.",answer:false,explain:"A balanced diet includes a variety of foods."},
+{statement:"Healthy eating replaces sleep and homework.",answer:false,explain:"Healthy eating supports learning, but it does not replace sleep or effort."},
+{statement:"Taha Hinengaro only means strong muscles.",answer:false,explain:"Taha Hinengaro relates to mental and emotional wellbeing."},
+{statement:"Water is a vitamin.",answer:false,explain:"Water is a main nutrient, not a vitamin."},
+{statement:"Kumara, pasta and oats are mainly protein foods.",answer:false,explain:"They are carbohydrate foods."},
+{statement:"Eggs, beans and lentils are carbohydrate-only foods.",answer:false,explain:"They are protein sources."},
+{statement:"Fruits and vegetables do not provide fibre.",answer:false,explain:"Fruits and vegetables can provide fibre."},
+{statement:"Zinc is only used to make food sweet.",answer:false,explain:"Zinc supports growth and healing."},
+{statement:"Water makes the body dehydrated.",answer:false,explain:"Water helps prevent dehydration."},
+{statement:"Nutrition is only about doing exercise.",answer:false,explain:"Nutrition is getting nutrients from food and drink."},
+{statement:"A meal of lollies and soft drink is a balanced meal.",answer:false,explain:"A balanced meal includes a mix of food groups and water."},
+{statement:"Iron removes oxygen from the body.",answer:false,explain:"Iron helps carry oxygen around the body."},
+{statement:"Vitamin C breaks bones.",answer:false,explain:"Vitamin C supports healing and immunity."},
+{statement:"Food choices cannot connect to values, culture or identity.",answer:false,explain:"Food choices can connect to Taha Wairua, values, culture and identity."}
+];
+
+function shuffle(arr){return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);}
+function screen(id){document.querySelectorAll('.screen,.hero').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goIntro(){clearTimers();screen('intro');}
+function showRules(){screen('rules');}
+function openTeacherMode(){screen('teacher');}
+function saveTeacherSettings(){settings.cashTime=parseInt(document.getElementById('cashTimeInput').value)||60;settings.finalTime=parseInt(document.getElementById('finalTimeInput').value)||90;settings.difficulty=document.getElementById('difficultyInput').value;screen('rules');}
+function clearTimers(){if(cashInterval)clearInterval(cashInterval);if(finalInterval)clearInterval(finalInterval);}
+function restartGame(){clearTimers();used=[];cashScore=0;chosenOffer=0;playerPos=3;chaserPos=0;finalSteps=0;screen('intro');}
+function nextQ(){if(used.length>questions.length-5)used=[];let i;do{i=Math.floor(Math.random()*questions.length)}while(used.includes(i));used.push(i);return questions[i];}
+function makeAnswers(q,container,handler){container.innerHTML='';let all=shuffle([q.a,...q.o]);all.forEach(txt=>{let b=document.createElement('button');b.className='answer';b.textContent=txt;b.onclick=()=>handler(b,txt,q.a);container.appendChild(b);});}
+function lockAnswers(container){[...container.children].forEach(b=>b.disabled=true);}
+
+function startCashBuilder(){cashScore=0;document.getElementById('cashBank').textContent='0';document.getElementById('cashScoreBig').textContent='0';screen('cash');let t=settings.cashTime;document.getElementById('cashTimer').textContent=t;cashQuestion();cashInterval=setInterval(()=>{t--;document.getElementById('cashTimer').textContent=t;if(t<=0){clearInterval(cashInterval);showOffers();}},1000);}
+function cashQuestion(){currentCash=nextQ();document.getElementById('cashQuestion').textContent=currentCash.q;document.getElementById('cashFeedback').textContent='';makeAnswers(currentCash,document.getElementById('cashAnswers'),cashAnswer);}
+function cashAnswer(btn,txt,ans){let c=document.getElementById('cashAnswers');lockAnswers(c);if(txt===ans){btn.classList.add('correct');cashScore+=1000;document.getElementById('cashBank').textContent=cashScore;document.getElementById('cashScoreBig').textContent=cashScore;document.getElementById('cashFeedback').textContent='Correct! +$1,000';}else{btn.classList.add('wrong');[...c.children].forEach(b=>{if(b.textContent===ans)b.classList.add('correct')});document.getElementById('cashFeedback').textContent='Wrong answer. Keep going!';}setTimeout(cashQuestion,900);}
+function showOffers(){screen('offers');let earned=Math.max(cashScore,1000);cashScore=earned;let low=Math.max(1000,earned-2000), mid=earned, high=earned+5000;document.getElementById('earnedOffer').textContent=earned;document.getElementById('lowOfferBtn').textContent=`Low Offer: $${low}`;document.getElementById('middleOfferBtn').textContent=`Middle Offer: $${mid}`;document.getElementById('highOfferBtn').textContent=`High Offer: $${high}`;document.getElementById('lowOfferBtn').dataset.money=low;document.getElementById('middleOfferBtn').dataset.money=mid;document.getElementById('highOfferBtn').dataset.money=high;}
+function chooseOffer(type){let btn=document.getElementById(type+'OfferBtn');chosenOffer=parseInt(btn.dataset.money);document.getElementById('chosenMoney').textContent=chosenOffer;playerPos= type==='high'?2:type==='middle'?3:4;chaserPos=0;screen('head');drawLadder();headQuestion();}
+function drawLadder(){let l=document.getElementById('ladder');l.innerHTML='';for(let i=0;i<7;i++){let d=document.createElement('div');d.className='step';if(i===6)d.classList.add('home');if(i===playerPos)d.classList.add('player');if(i===chaserPos)d.classList.add('chaser');let label=i===0?'CHASER START':i===6?'HOME SAFE':`Step ${i}`;let tok='';if(i===playerPos)tok+=' ✅';if(i===chaserPos)tok+=' 🔴';d.innerHTML=`<span>${label}</span><span class="token">${tok}</span>`;l.appendChild(d);}}
+function headQuestion(){currentHead=nextQ();document.getElementById('headQuestion').textContent=currentHead.q;document.getElementById('headFeedback').textContent='';makeAnswers(currentHead,document.getElementById('headAnswers'),headAnswer);}
+function headAnswer(btn,txt,ans){let c=document.getElementById('headAnswers');lockAnswers(c);let playerCorrect=txt===ans;let chaserCorrect=Math.random()<0.9;if(playerCorrect){btn.classList.add('correct');playerPos++;}else{btn.classList.add('wrong');[...c.children].forEach(b=>{if(b.textContent===ans)b.classList.add('correct')});}
+if(chaserCorrect)chaserPos++;
+let msg=playerCorrect?'Correct. You move one step closer to home. ':'Wrong. Correct answer: '+ans+'. ';
+msg+=chaserCorrect?'The Chaser is correct and moves one step closer.':'The Chaser gets it wrong and stays where they are.';
+document.getElementById('headFeedback').textContent=msg;drawLadder();setTimeout(()=>{if(playerPos>=6){document.getElementById('finalMoney').textContent=chosenOffer;screen('finalIntro');}else if(chaserPos>=playerPos){chosenOffer=0;showCaught('The Chaser caught you in the head-to-head round.');}else{headQuestion();}},1600);}
+function showCaught(msg){document.getElementById('resultTitle').textContent='Caught by the Chaser';document.getElementById('resultText').textContent=msg;document.getElementById('resultMoney').textContent='0';screen('result');}
+function startFinalChase(){finalSteps=0;finalTrueCount=0;finalFalseCount=0;finalTrueTarget=shuffle([0.5,0.45,0.4])[0];document.getElementById('finalSteps').textContent='0';document.getElementById('finalStepsBig').textContent='0';screen('final');let t=settings.finalTime;document.getElementById('finalTimer').textContent=t;finalQuestion();finalInterval=setInterval(()=>{t--;document.getElementById('finalTimer').textContent=t;if(t<=0){clearInterval(finalInterval);showChaserFinal();}},1000);}
+function pickFinalStatement(){let total=finalTrueCount+finalFalseCount;let trueNeeded=(total===0)?(Math.random()<finalTrueTarget):(finalTrueCount/Math.max(total,1)<finalTrueTarget);let pool=trueNeeded?finalTrueStatements:finalFalseStatements;let item=pool[Math.floor(Math.random()*pool.length)];if(item.answer)finalTrueCount++;else finalFalseCount++;return item;}
+function finalQuestion(){currentFinal=pickFinalStatement();document.getElementById('finalQuestion').textContent=currentFinal.statement;document.getElementById('finalFeedback').textContent='';let box=document.getElementById('finalShortAnswers');box.innerHTML='';let trueBtn=document.createElement('button');trueBtn.className='primary';trueBtn.textContent='True';trueBtn.onclick=()=>finalTFAnswer(true);let falseBtn=document.createElement('button');falseBtn.className='secondary';falseBtn.textContent='False';falseBtn.onclick=()=>finalTFAnswer(false);box.appendChild(trueBtn);box.appendChild(falseBtn);}
+function finalTFAnswer(choice){let box=document.getElementById('finalShortAnswers');[...box.children].forEach(b=>b.disabled=true);let correct=choice===currentFinal.answer;if(correct){finalSteps++;document.getElementById('finalSteps').textContent=finalSteps;document.getElementById('finalStepsBig').textContent=finalSteps;document.getElementById('finalFeedback').textContent='Correct. '+currentFinal.explain;}else{document.getElementById('finalFeedback').textContent='Wrong. '+currentFinal.explain;}setTimeout(finalQuestion,800);}
+function showChaserFinal(){document.getElementById('targetSteps').textContent=finalSteps;document.getElementById('chaserProgress').textContent='0';document.getElementById('chaserText').textContent=finalSteps===0?'No steps scored. The Chaser has caught you.':'Press start to begin the Chaser simulation. The Chaser has a 90% chance of answering each question correctly.';document.getElementById('startChaserBtn').disabled=finalSteps===0;screen('chaserFinal');if(finalSteps===0)setTimeout(()=>finish(false),1200);}
+function runChaserFinal(){document.getElementById('startChaserBtn').disabled=true;let chance=0.9;let progress=0;let attempts=Math.max(finalSteps+4,10);let count=0;let sim=setInterval(()=>{count++;let correct=Math.random()<chance;if(correct)progress++;document.getElementById('chaserProgress').textContent=progress;document.getElementById('chaserText').textContent=correct?'Chaser answered correctly.':'Chaser passed.';if(progress>=finalSteps){clearInterval(sim);finish(false);}else if(count>=attempts){clearInterval(sim);finish(true);}},850);}
+function finish(won){document.getElementById('resultTitle').textContent=won?'You Beat the Chaser!':'Caught by the Chaser';document.getElementById('resultText').textContent=won?'Excellent nutrition knowledge. You escaped with the money.':'The Chaser caught the team. Restart and try again.';document.getElementById('resultMoney').textContent=won?chosenOffer:0;screen('result');}
+</script>
+</body>
+</html>
